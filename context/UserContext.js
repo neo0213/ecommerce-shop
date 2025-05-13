@@ -53,28 +53,16 @@ export function UserProvider({ children }) {
     }
   }, [user]);
 
-  const login = (username, gender, income) => {
-    const newUser = { username, gender, income, isLoyal: false };
-    setUser(newUser);
-    localStorage.setItem('currentUser', JSON.stringify(newUser));
-
-    // Update users list in localStorage
+  const login = (loginObj) => {
     const users = JSON.parse(localStorage.getItem('users') || '[]');
-    const existingUserIndex = users.findIndex(u => u.username === username);
-    
-    if (existingUserIndex >= 0) {
-      users[existingUserIndex] = {
-        ...users[existingUserIndex],
-        lastLogin: new Date().toISOString()
-      };
+    const foundUser = users.find(u => u.username === loginObj.username);
+    if (foundUser && foundUser.password === loginObj.password) {
+      setUser(foundUser);
+      localStorage.setItem('currentUser', JSON.stringify(foundUser));
+      return true;
     } else {
-      users.push({
-        ...newUser,
-        sessionTime: 0,
-        lastLogin: new Date().toISOString()
-      });
+      return false;
     }
-    localStorage.setItem('users', JSON.stringify(users));
   };
 
   const logout = () => {
@@ -110,8 +98,22 @@ export function UserProvider({ children }) {
     }
   };
 
+  const register = (userObj) => {
+    const users = JSON.parse(localStorage.getItem('users') || '[]');
+    if (users.find(u => u.username === userObj.username)) {
+      return false; // Username already exists
+    }
+    users.push({
+      ...userObj,
+      sessionTime: 0,
+      lastLogin: new Date().toISOString()
+    });
+    localStorage.setItem('users', JSON.stringify(users));
+    return true;
+  };
+
   return (
-    <UserContext.Provider value={{ user, login, logout, updateUser, sessionTime, activateLoyalty }}>
+    <UserContext.Provider value={{ user, login, logout, updateUser, sessionTime, activateLoyalty, register }}>
       {children}
     </UserContext.Provider>
   );

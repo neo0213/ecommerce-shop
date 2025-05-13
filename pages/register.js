@@ -4,17 +4,36 @@ import { useRouter } from "next/router";
 import Link from "next/link";
 
 export default function Register() {
-  const { login } = useUser();
+  const { register } = useUser();
   const router = useRouter();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [gender, setGender] = useState("");
   const [income, setIncome] = useState("");
+  const [age, setAge] = useState("");
+  const [error, setError] = useState("");
 
   const handleRegister = (e) => {
     e.preventDefault();
-    login(username, gender, income);
-    router.push("/");
+    const success = register({
+      username,
+      password,
+      age,
+      gender,
+      income,
+      numberOfPurchases: 0,
+      productCategory: Math.floor(Math.random() * 5),
+      sessionTime: 0,
+      isLoyal: false,
+      discountsAvailed: 0,
+      purchaseStatus: 0,
+    });
+    if (!success) {
+      setError("Username already exists");
+    } else {
+      setError("");
+      router.push("/login");
+    }
   };
 
   return (
@@ -56,12 +75,21 @@ export default function Register() {
           className="border rounded px-3 py-2 bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
           required
         />
+        <input
+          type="number"
+          placeholder="Age"
+          value={age}
+          onChange={(e) => setAge(e.target.value)}
+          className="border rounded px-3 py-2 bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+          required
+        />
         <button
           type="submit"
           className="bg-orange-500 text-white px-6 py-2 rounded font-bold hover:bg-orange-600"
         >
           Register
         </button>
+        {error && <div className="text-red-500 text-sm mt-2">{error}</div>}
       </form>
       <div className="mt-4 text-center text-gray-700 dark:text-gray-200">
         <span>Already have an account? </span>

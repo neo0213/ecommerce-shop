@@ -6,10 +6,16 @@ export default function Login() {
   const { user, login, logout, sessionTime } = useUser();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
 
   const handleLogin = (e) => {
     e.preventDefault();
-    login(username, undefined, undefined); // Only username is used for now
+    const success = login({ username, password });
+    if (!success) {
+      setError("Invalid username or password");
+    } else {
+      setError("");
+    }
   };
 
   if (user) {
@@ -47,6 +53,7 @@ export default function Login() {
         >
           Login
         </button>
+        {error && <div className="text-red-500 text-sm mt-2">{error}</div>}
       </form>
       <div className="mt-4 text-center text-gray-700 dark:text-gray-200">
         <span>Don't have an account? </span>

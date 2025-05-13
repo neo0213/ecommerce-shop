@@ -22,13 +22,17 @@ export default function AdminAnalytics() {
       const analyticsData = users
         .filter(user => user.username !== 'admin') // Filter out admin user
         .map(user => ({
-          username: user.username,
-          gender: user.gender,
-          income: user.income,
-          sessionTime: user.sessionTime || 0,
-          lastLogin: user.lastLogin || new Date().toISOString(),
-          isLoyal: user.isLoyal || false
-        }));
+          age: user.age || '',
+          gender: user.gender || '',
+          annualIncome: user.income || '',
+          numberOfPurchases: user.numberOfPurchases || 0,
+          productCategory: user.productCategory,
+          timeSpentOnWebsite: user.sessionTime || 0,
+          loyaltyProgram: user.isLoyal ? 1 : 0,
+          discountsAvailed: user.discountsAvailed || 0,
+          purchaseStatus: user.purchaseStatus || 0,
+        }))
+        .filter(user => [0,1,2,3,4].includes(user.productCategory));
       setAnalytics(analyticsData);
     };
 
@@ -59,17 +63,17 @@ export default function AdminAnalytics() {
 
   const filteredAndSortedData = analytics
     .filter(user => 
-      user.username.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      user.age.toLowerCase().includes(searchTerm.toLowerCase()) ||
       user.gender.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      user.income.toString().includes(searchTerm)
+      user.annualIncome.toString().includes(searchTerm)
     )
     .sort((a, b) => {
       if (!sortConfig.key) return 0;
       
-      if (sortConfig.key === 'lastLogin') {
+      if (sortConfig.key === 'age') {
         return sortConfig.direction === 'asc' 
-          ? new Date(a.lastLogin) - new Date(b.lastLogin)
-          : new Date(b.lastLogin) - new Date(a.lastLogin);
+          ? a.age.localeCompare(b.age)
+          : b.age.localeCompare(a.age);
       }
       
       return sortConfig.direction === 'asc'
@@ -106,12 +110,15 @@ export default function AdminAnalytics() {
           <thead>
             <tr className="bg-orange-100 dark:bg-orange-900">
               {[
-                { key: 'username', label: 'Username' },
+                { key: 'age', label: 'Age' },
                 { key: 'gender', label: 'Gender' },
-                { key: 'income', label: 'Income' },
-                { key: 'sessionTime', label: 'Session Time (s)' },
-                { key: 'lastLogin', label: 'Last Login' },
-                { key: 'isLoyal', label: 'Loyalty Program' }
+                { key: 'annualIncome', label: 'AnnualIncome' },
+                { key: 'numberOfPurchases', label: 'NumberOfPurchases' },
+                { key: 'productCategory', label: 'ProductCategory' },
+                { key: 'timeSpentOnWebsite', label: 'TimeSpentOnWebsite' },
+                { key: 'loyaltyProgram', label: 'LoyaltyProgram' },
+                { key: 'discountsAvailed', label: 'DiscountsAvailed' },
+                { key: 'purchaseStatus', label: 'PurchaseStatus' },
               ].map(({ key, label }) => (
                 <th
                   key={key}
@@ -131,22 +138,15 @@ export default function AdminAnalytics() {
           <tbody>
             {filteredAndSortedData.map((user, i) => (
               <tr key={i} className="text-center hover:bg-gray-50 dark:hover:bg-gray-800">
-                <td className="py-2 px-4 border text-gray-900 dark:text-white">{user.username}</td>
+                <td className="py-2 px-4 border text-gray-900 dark:text-white">{user.age}</td>
                 <td className="py-2 px-4 border text-gray-900 dark:text-white">{user.gender}</td>
-                <td className="py-2 px-4 border text-gray-900 dark:text-white">{user.income}</td>
-                <td className="py-2 px-4 border text-gray-900 dark:text-white">{user.sessionTime}</td>
-                <td className="py-2 px-4 border text-gray-900 dark:text-white">
-                  {new Date(user.lastLogin).toLocaleString()}
-                </td>
-                <td className="py-2 px-4 border text-gray-900 dark:text-white">
-                  <span className={`px-2 py-1 rounded-full text-xs font-bold ${
-                    user.isLoyal 
-                      ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' 
-                      : 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200'
-                  }`}>
-                    {user.isLoyal ? 'Active' : 'Inactive'}
-                  </span>
-                </td>
+                <td className="py-2 px-4 border text-gray-900 dark:text-white">{user.annualIncome}</td>
+                <td className="py-2 px-4 border text-gray-900 dark:text-white">{user.numberOfPurchases}</td>
+                <td className="py-2 px-4 border text-gray-900 dark:text-white">{user.productCategory}</td>
+                <td className="py-2 px-4 border text-gray-900 dark:text-white">{(user.timeSpentOnWebsite / 60).toFixed(2)}</td>
+                <td className="py-2 px-4 border text-gray-900 dark:text-white">{user.loyaltyProgram}</td>
+                <td className="py-2 px-4 border text-gray-900 dark:text-white">{user.discountsAvailed}</td>
+                <td className="py-2 px-4 border text-gray-900 dark:text-white">{user.purchaseStatus}</td>
               </tr>
             ))}
           </tbody>
