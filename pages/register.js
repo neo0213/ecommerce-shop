@@ -27,6 +27,8 @@ export default function Register() {
       isLoyal: false,
       discountsAvailed: 0,
       purchaseStatus: 0,
+      usedVouchers: [false, false, false, false, false],
+      voucherUses: 0,
     });
     if (!success) {
       setError("Username already exists");

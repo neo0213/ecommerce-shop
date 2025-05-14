@@ -22,23 +22,23 @@ export default function AdminAnalytics() {
       const analyticsData = users
         .filter(user => user.username !== 'admin') // Filter out admin user
         .map(user => ({
-          age: user.age || '',
-          gender: user.gender || '',
-          annualIncome: user.income || '',
-          numberOfPurchases: user.numberOfPurchases || 0,
-          productCategory: user.productCategory,
-          timeSpentOnWebsite: user.sessionTime || 0,
+          age: Number(user.age) || '',
+          gender: user.gender === 'Male' || user.gender === 0 ? 0 : 1,
+          annualIncome: Number(user.income) || '',
+          numberOfPurchases: Number(user.numberOfPurchases) || 0,
+          productCategory: Number(user.productCategory),
+          timeSpentOnWebsite: Number(user.sessionTime || 0), // Remove decimal formatting
           loyaltyProgram: user.isLoyal ? 1 : 0,
-          discountsAvailed: user.discountsAvailed || 0,
-          purchaseStatus: user.purchaseStatus || 0,
+          discountsAvailed: Number(user.discountsAvailed) || 0,
+          purchaseStatus: Number(user.purchaseStatus) || 0,
         }))
         .filter(user => [0,1,2,3,4].includes(user.productCategory));
       setAnalytics(analyticsData);
     };
 
     fetchAnalytics();
-    // Update analytics every minute
-    const interval = setInterval(fetchAnalytics, 60000);
+    // Update analytics every second instead of every minute
+    const interval = setInterval(fetchAnalytics, 1000);
     return () => clearInterval(interval);
   }, [user, router]);
 
@@ -63,8 +63,8 @@ export default function AdminAnalytics() {
 
   const filteredAndSortedData = analytics
     .filter(user => 
-      user.age.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      user.gender.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      user.age.toString().includes(searchTerm) ||
+      user.gender.toString().includes(searchTerm) ||
       user.annualIncome.toString().includes(searchTerm)
     )
     .sort((a, b) => {
@@ -112,13 +112,13 @@ export default function AdminAnalytics() {
               {[
                 { key: 'age', label: 'Age' },
                 { key: 'gender', label: 'Gender' },
-                { key: 'annualIncome', label: 'AnnualIncome' },
-                { key: 'numberOfPurchases', label: 'NumberOfPurchases' },
-                { key: 'productCategory', label: 'ProductCategory' },
-                { key: 'timeSpentOnWebsite', label: 'TimeSpentOnWebsite' },
-                { key: 'loyaltyProgram', label: 'LoyaltyProgram' },
-                { key: 'discountsAvailed', label: 'DiscountsAvailed' },
-                { key: 'purchaseStatus', label: 'PurchaseStatus' },
+                { key: 'annualIncome', label: 'Annual income' },
+                { key: 'numberOfPurchases', label: 'Number of purchases' },
+                { key: 'productCategory', label: 'Product category' },
+                { key: 'timeSpentOnWebsite', label: 'Time spent on website (seconds)' },
+                { key: 'loyaltyProgram', label: 'Loyalty program' },
+                { key: 'discountsAvailed', label: 'Discounts availed' },
+                { key: 'purchaseStatus', label: 'Purchase status' },
               ].map(({ key, label }) => (
                 <th
                   key={key}
@@ -143,7 +143,7 @@ export default function AdminAnalytics() {
                 <td className="py-2 px-4 border text-gray-900 dark:text-white">{user.annualIncome}</td>
                 <td className="py-2 px-4 border text-gray-900 dark:text-white">{user.numberOfPurchases}</td>
                 <td className="py-2 px-4 border text-gray-900 dark:text-white">{user.productCategory}</td>
-                <td className="py-2 px-4 border text-gray-900 dark:text-white">{(user.timeSpentOnWebsite / 60).toFixed(2)}</td>
+                <td className="py-2 px-4 border text-gray-900 dark:text-white">{user.timeSpentOnWebsite}</td>
                 <td className="py-2 px-4 border text-gray-900 dark:text-white">{user.loyaltyProgram}</td>
                 <td className="py-2 px-4 border text-gray-900 dark:text-white">{user.discountsAvailed}</td>
                 <td className="py-2 px-4 border text-gray-900 dark:text-white">{user.purchaseStatus}</td>
