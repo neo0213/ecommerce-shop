@@ -1,11 +1,13 @@
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import { useCart } from "../../context/CartContext";
+import { useUser } from "../../context/UserContext";
 
 export default function ProductPage() {
   const router = useRouter();
   const { id } = router.query;
-  const { addToCart } = useCart();
+  const { cart, addToCart } = useCart();
+  const { user } = useUser();
   const [product, setProduct] = useState(null);
   const [quantity, setQuantity] = useState(1);
 
@@ -16,6 +18,13 @@ export default function ProductPage() {
         .then(data => setProduct(data));
     }
   }, [id]);
+
+  const handleAddToCart = () => {
+    addToCart(product, quantity);
+    setTimeout(() => {
+      router.push("/cart");
+    }, 0);
+  };
 
   if (!product) return <div className="p-8">Loading...</div>;
 
@@ -43,10 +52,7 @@ export default function ProductPage() {
           </div>
           <button
             className="bg-orange-500 text-white px-6 py-2 rounded font-bold hover:bg-orange-600"
-            onClick={() => {
-              addToCart(product, quantity);
-              router.push("/cart");
-            }}
+            onClick={handleAddToCart}
           >
             Add to Cart
           </button>

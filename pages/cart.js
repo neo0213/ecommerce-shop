@@ -2,19 +2,44 @@ import { useCart } from "../context/CartContext";
 import { useUser } from "../context/UserContext";
 import { useRouter } from "next/router";
 import Link from "next/link";
+import { useState } from "react";
 
 export default function Cart() {
   const { cart, removeFromCart, clearCart } = useCart();
-  const { user, activateLoyalty } = useUser();
+  const { user, activateLoyalty, updateUser } = useUser();
   const router = useRouter();
+  const voucherUses = user?.voucherUses || 0;
+  const canUseVoucher = voucherUses < 5;
+  const [applyVoucher, setApplyVoucher] = useState(false);
+
   const subtotal = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
   const discount = user?.isLoyal ? subtotal * 0.2 : 0;
-  const total = subtotal - discount;
+  const voucherDiscount = applyVoucher && canUseVoucher ? 5 : 0;
+  const total = subtotal - discount - voucherDiscount;
+
+  const handleRemove = (id) => {
+    removeFromCart(id);
+  };
+
+  const handleClearCart = () => {
+    clearCart();
+  };
 
   const handleCheckout = () => {
     if (!user?.isLoyal) {
       activateLoyalty();
     }
+    
+    // Update voucher uses and discounts if voucher was applied
+    if (applyVoucher && canUseVoucher) {
+      const newVoucherUses = voucherUses + 1;
+      const newDiscountsAvailed = Math.min(5, (user?.discountsAvailed || 0) + 1);
+      updateUser({ 
+        voucherUses: newVoucherUses,
+        discountsAvailed: newDiscountsAvailed 
+      });
+    }
+    
     router.push('/thank-you');
   };
 
@@ -38,7 +63,7 @@ export default function Cart() {
                 </div>
                 <button
                   className="text-red-500 dark:text-red-300 hover:underline"
-                  onClick={() => removeFromCart(item.id)}
+                  onClick={() => handleRemove(item.id)}
                 >
                   Remove
                 </button>
@@ -56,13 +81,30 @@ export default function Cart() {
                 <div>-₱{discount.toLocaleString()}</div>
               </div>
             )}
+            {canUseVoucher && (
+              <div className="flex justify-between items-center">
+                <div className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    id="voucher"
+                    checked={applyVoucher}
+                    onChange={(e) => setApplyVoucher(e.target.checked)}
+                    className="rounded border-gray-300"
+                  />
+                  <label htmlFor="voucher" className="text-gray-700 dark:text-gray-200">
+                    Apply ₱5 Voucher (Uses left: {5 - voucherUses})
+                  </label>
+                </div>
+                {applyVoucher && <div className="text-blue-600 dark:text-blue-400">-₱5</div>}
+              </div>
+            )}
             <div className="flex justify-between items-center border-t pt-2">
               <div className="font-bold text-gray-900 dark:text-white">Total:</div>
               <div className="font-bold text-orange-500 dark:text-orange-300">₱{total.toLocaleString()}</div>
             </div>
           </div>
           <div className="flex justify-between items-center">
-            <button className="text-sm text-gray-500 dark:text-gray-300 hover:underline" onClick={clearCart}>
+            <button className="text-sm text-gray-500 dark:text-gray-300 hover:underline" onClick={handleClearCart}>
               Clear Cart
             </button>
             <button

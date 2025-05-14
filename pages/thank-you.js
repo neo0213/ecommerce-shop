@@ -14,17 +14,17 @@ export default function ThankYou() {
     clearCart();
     // Update user stats after purchase
     if (user) {
+      const prevPurchases = Number(user.numberOfPurchases) || 0;
       const updatedFields = {
-        numberOfPurchases: (user.numberOfPurchases || 0) + 1,
+        numberOfPurchases: prevPurchases + 1,
         purchaseStatus: 1,
-        discountsAvailed: user.isLoyal ? (user.discountsAvailed || 0) + 1 : (user.discountsAvailed || 0),
         productCategory: Math.floor(Math.random() * 5),
         sessionTime: user.sessionTime || 0,
         loyaltyProgram: user.isLoyal ? 1 : 0,
       };
       updateUser(updatedFields);
     }
-  }, [clearCart, user, updateUser]);
+  }, []); // Only run once on mount
 
   return (
     <div className="max-w-md mx-auto py-16 px-4 text-center">
